@@ -6,6 +6,15 @@ const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URL).then(() => console.log('connected to mongodb'))
 const port =process.env.PORT || 3000;
 
+const cors = require("cors");
+
+app.use(
+    cors({
+        origin:"*"
+    })
+)
+
+
 
 const authRoute = require('./routes/auth');
 const postRoute = require('./routes/post');
