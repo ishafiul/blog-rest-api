@@ -54,10 +54,10 @@ router.get('/',async (req, res)=>{
     try {
         let post;
         if (username){
-            post = await Post.find({username})
+            post = await Post.find({username}).sort([['date', -1]])
         }
         else {
-            post = await Post.find();
+            post = await Post.find().sort([['date', -1]]);
         }
         res.status(200).json(post);
     }
