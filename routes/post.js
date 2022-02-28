@@ -79,6 +79,7 @@ router.get('/lastpost',async (req, res)=>{
 })
 
 router.get("/:id", async (req, res)=>{
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
     try {
         const post = await Post.findById(req.params.id)
         res.status(200).json(post);
