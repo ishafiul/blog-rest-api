@@ -25,18 +25,20 @@ router.post('/login',async (req,res)=>{
     try {
         const user = await User.findOne({email:req.body.email});
         if (!user){
-            res.status(500).json('wrong username or password!');
+            res.status(401).json({error: "User not found"});
         }
-        const bytes  = CryptoJS.AES.decrypt(user.password, process.env.HASH_KEY);
-        const passValidate =bytes.toString(CryptoJS.enc.Utf8);
-        if (!passValidate){
-            res.status(500).json('wrong username or password!');
+        else{
+            const bytes  = CryptoJS.AES.decrypt(user.password, process.env.HASH_KEY);
+            const passValidate =bytes.toString(CryptoJS.enc.Utf8);
+            if (!passValidate){
+                res.status(500).json('wrong username or password!');
+            }
+            const {password,...others} = user._doc;
+            res.status(200).json(others);
         }
-        const {password,...others} = user._doc;
-        res.status(200).json(others);
     }
     catch (err){
-        res.status(500).json(err);
+        res.status(404).json(err);
     }
 })
 

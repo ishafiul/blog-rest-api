@@ -12,6 +12,14 @@ const PostSchema = new mongoose.Schema({
     username:{
         type: String,
         required: true,
+    },
+    designation:{
+        type: String,
+        required: false,
+        default:'unknown'
+    },
+    postImg:{
+        type: String,
     }
 }, {timestamps: true});
 
