@@ -54,11 +54,23 @@ router.get('/',async (req, res)=>{
     try {
         let post;
         if (username){
-            post = await Post.find({username}).sort([['date', -1]])
+            post = await Post.find({username}, {}, { sort: { 'createdAt' : -1 } })
         }
         else {
-            post = await Post.find().sort([['date', -1]]);
+            post = await Post.find({}, {}, { sort: { 'createdAt' : -1 } })
         }
+        res.status(200).json(post);
+    }
+    catch (err){
+        res.status(500).json(err);
+    }
+})
+
+router.get('/lastpost',async (req, res)=>{
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
+    try {
+        let post;
+        post = await Post.findOne({}, {}, { sort: { 'createdAt' : -1 } });
         res.status(200).json(post);
     }
     catch (err){
