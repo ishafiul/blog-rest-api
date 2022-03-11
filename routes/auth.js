@@ -3,6 +3,13 @@ const  User =require("../models/User");
 require("dotenv").config();
 const CryptoJS = require("crypto-js");
 
+
+const jwt  = require('jsonwebtoken');
+
+
+
+
+
 //register
 router.post('/signup',async (req,res)=>{
     try {
@@ -13,7 +20,8 @@ router.post('/signup',async (req,res)=>{
             password: hashPassword,
         })
         const user = await newUser.save();
-        res.status(200).json(user);
+        const token = jwt.sign(user, process.env.TOKEN_SECRET)
+        res.status(200).json({token: token});
     }
     catch (err){
         res.status(500).json(err);
@@ -23,7 +31,7 @@ router.post('/signup',async (req,res)=>{
 //login
 router.post('/login',async (req,res)=>{
     try {
-        const user = await User.findOne({email:req.body.email});
+        const user = await User.findOne({username:req.body.username});
         if (!user){
             res.status(401).json({error: "User not found"});
         }
@@ -33,8 +41,9 @@ router.post('/login',async (req,res)=>{
             if (!passValidate){
                 res.status(500).json('wrong username or password!');
             }
-            const {password,...others} = user._doc;
-            res.status(200).json(others);
+            const user = user._doc;
+            const token = jwt.sign(user, process.env.TOKEN_SECRET)
+            res.status(200).json({ggg:token});
         }
     }
     catch (err){

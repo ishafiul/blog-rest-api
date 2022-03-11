@@ -1,5 +1,9 @@
 const router =  require("express").Router();
 const  Post =require("../models/Post");
+const Authmiddle = require('../middleware/auth')
+
+const authMiddle  = new Authmiddle()
+
 
 //multer
 const multer = require("multer");
@@ -66,7 +70,7 @@ router.get('/',async (req, res)=>{
     }
 })
 
-router.get('/lastpost',async (req, res)=>{
+router.get('/lastpost',authMiddle.token,async (req, res)=>{
 
     try {
         let post;

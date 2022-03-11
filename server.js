@@ -27,4 +27,6 @@ app.use("/api/auth",authRoute);
 app.use("/api/post",postRoute);
 app.use(express.static('upload'));
 
+
+
 app.listen(port, () => console.log(`Server is running at http://localhost:${port}`));
