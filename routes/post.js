@@ -70,7 +70,7 @@ router.get('/',async (req, res)=>{
     }
 })
 
-router.get('/lastpost',authMiddle.token,async (req, res)=>{
+router.get('/lastpost',async (req, res)=>{
 
     try {
         let post;

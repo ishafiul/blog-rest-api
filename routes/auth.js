@@ -21,7 +21,7 @@ router.post('/signup',async (req,res)=>{
         })
         const user = await newUser.save();
         const token = jwt.sign(user, process.env.TOKEN_SECRET)
-        res.status(200).json({token: token});
+        res.status(200).json(user);
     }
     catch (err){
         res.status(500).json(err);
@@ -41,9 +41,9 @@ router.post('/login',async (req,res)=>{
             if (!passValidate){
                 res.status(500).json('wrong username or password!');
             }
-            const user = user._doc;
-            const token = jwt.sign(user, process.env.TOKEN_SECRET)
-            res.status(200).json({ggg:token});
+            const data = user._doc;
+            const token = jwt.sign(data, process.env.TOKEN_SECRET)
+            res.status(200).json({token: token});
         }
     }
     catch (err){
