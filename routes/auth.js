@@ -44,12 +44,22 @@ router.post('/login',async (req,res)=>{
             if (!passValidate){
                 res.status(500).json('wrong username or password!');
             }
-            //const data = user._doc;
-           const token = generetAccessToken(user._doc)
-            const refresh_token = jwt.sign(user._doc , process.env.TOKEN_SECRET_REFRESH)
+            const data = user._doc;
+
+           const token = generetAccessToken({
+               userId: data._id,
+               username: data.username,
+               email: data.email,
+           })
+            const refresh_token = jwt.sign({
+                userId: data._id,
+                username: data.username,
+                email: data.email,
+            } ,
+                process.env.TOKEN_SECRET_REFRESH)
             res.status(200).json({
                 access_token: token,
-                refresh_token : refresh_token
+                refresh_token : refresh_token,
             });
         }
     }
@@ -79,6 +89,6 @@ router.post('/token', async (req, res)=>{
 
 //generet token
 function generetAccessToken(user){
-    return jwt.sign(user , process.env.TOKEN_SECRET, {expiresIn: '30m'})
+    return jwt.sign(user , process.env.TOKEN_SECRET, {expiresIn: '30s'})
 }
 module.exports = router;
