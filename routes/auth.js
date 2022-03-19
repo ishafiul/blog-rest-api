@@ -34,7 +34,7 @@ router.post('/signup',async (req,res)=>{
 //login
 router.post('/login',async (req,res)=>{
     try {
-        const user = await User.findOne({username:req.body.username});
+        const user = await User.findOne({username:req.body.email});
         if (!user){
             res.status(401).json({error: "User not found"});
         }
