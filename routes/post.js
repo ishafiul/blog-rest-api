@@ -52,7 +52,7 @@ router.post('/create', upload.single('postImg'),async (req,res)=>{
 })
 
 //get
-router.get('/',async (req, res)=>{
+router.get('/',authMiddle.token,async (req, res)=>{
     
     const username = req.query.user;
     try {

@@ -20,8 +20,11 @@ router.post('/signup',async (req,res)=>{
             password: hashPassword,
         })
         const user = await newUser.save();
-        const token = jwt.sign(user, process.env.TOKEN_SECRET)
-        res.status(200).json(user);
+        //const token = jwt.sign(user, process.env.TOKEN_SECRET)
+        res.status(201).json({
+            message: 'User Created Successfully',
+            status : 'created'
+        });
     }
     catch (err){
         res.status(500).json(err);
@@ -41,9 +44,13 @@ router.post('/login',async (req,res)=>{
             if (!passValidate){
                 res.status(500).json('wrong username or password!');
             }
-            const data = user._doc;
-            const token = jwt.sign(data, process.env.TOKEN_SECRET)
-            res.status(200).json({token: token});
+            //const data = user._doc;
+           const token = generetAccessToken(user._doc)
+            const refresh_token = jwt.sign(user._doc , process.env.TOKEN_SECRET_REFRESH)
+            res.status(200).json({
+                access_token: token,
+                refresh_token : refresh_token
+            });
         }
     }
     catch (err){
@@ -51,4 +58,27 @@ router.post('/login',async (req,res)=>{
     }
 })
 
+//token
+
+router.post('/token', async (req, res)=>{
+    try {
+        const refresh_token = req.body.token
+        jwt.verify(refresh_token, process.env.TOKEN_SECRET_REFRESH,(err, data)=>{
+            const token = generetAccessToken({username: data.username})
+            //const refresh_token_new = jwt.sign(data, process.env.TOKEN_SECRET_REFRESH)
+            res.status(200).json({
+                access_token: token,
+            });
+        })
+    }
+    catch (err){
+        res.status(404).json(err);
+    }
+})
+
+
+//generet token
+function generetAccessToken(user){
+    return jwt.sign(user , process.env.TOKEN_SECRET, {expiresIn: '30m'})
+}
 module.exports = router;
