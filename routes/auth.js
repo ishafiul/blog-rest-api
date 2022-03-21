@@ -74,7 +74,10 @@ router.post('/token', async (req, res)=>{
     try {
         const refresh_token = req.body.token
         jwt.verify(refresh_token, process.env.TOKEN_SECRET_REFRESH,(err, data)=>{
-            const token = generetAccessToken({username: data.username})
+            const token = generetAccessToken({
+                userId: data._id,
+                username: data.username,
+                email: data.email,})
             //const refresh_token_new = jwt.sign(data, process.env.TOKEN_SECRET_REFRESH)
             res.status(200).json({
                 access_token: token,
