@@ -51,12 +51,11 @@ router.post('/login',async (req,res)=>{
                username: data.username,
                email: data.email,
            })
-            const refresh_token = jwt.sign({
+            const refresh_token = generetRefreshToken({
                 userId: data._id,
                 username: data.username,
                 email: data.email,
-            } ,
-                process.env.TOKEN_SECRET_REFRESH)
+            })
             res.status(200).json({
                 access_token: token,
                 refresh_token : refresh_token,
@@ -78,9 +77,15 @@ router.post('/token', async (req, res)=>{
                 userId: data._id,
                 username: data.username,
                 email: data.email,})
+            const refresh_token = generetRefreshToken({
+                userId: data._id,
+                username: data.username,
+                email: data.email,
+            })
             //const refresh_token_new = jwt.sign(data, process.env.TOKEN_SECRET_REFRESH)
             res.status(200).json({
                 access_token: token,
+                refresh_token : refresh_token,
             });
         })
     }
@@ -92,6 +97,10 @@ router.post('/token', async (req, res)=>{
 
 //generet token
 function generetAccessToken(user){
-    return jwt.sign(user , process.env.TOKEN_SECRET, {expiresIn: '30s'})
+    return jwt.sign(user , process.env.TOKEN_SECRET, {expiresIn: '1m'})
+}
+
+function generetRefreshToken(user){
+    return jwt.sign(user , process.env.TOKEN_SECRET_REFRESH, {expiresIn: '2m'})
 }
 module.exports = router;
