@@ -33,28 +33,26 @@ app.get('/', (req, res) => {
 app.use("/api/auth", authRoute);
 app.use("/api/post", postRoute);
 
-app.post('api/mail', (req, res) => {
+app.post('/api/mail', (req, res) => {
         const nodemailer = require("nodemailer");
         try{
             async function main() {
-                // create reusable transporter object using the default SMTP transport
                 let transporter = nodemailer.createTransport({
                     host: "smtp.gmail.com",
                     port: 587,
-                    secure: false, // true for 465, false for other ports
+                    secure: false,
                     auth: {
-                        user: '17182103210@cse.bubt.edu.bd', // generated ethereal user
-                        pass:  process.env.MAIL_PASS // generated ethereal password
+                        user: '17182103210@cse.bubt.edu.bd',
+                        pass:  process.env.MAIL_PASS
                     },
                 });
 
-                // send mail with defined transport object
                 await transporter.sendMail({
-                    from: req.body.sender, // sender address
-                    to: "shafiulislam20@gmail.com", // list of receivers
-                    subject: "Portfolio - " + req.body.subject, // Subject line
-                    text: req.body.message + ' ' + req.body.sender , // plain text body
-                    html: req.body.message + ' ' + req.body.sender, // html body
+                    from: req.body.sender,
+                    to: "shafiulislam20@gmail.com",
+                    subject: "Portfolio - "+req.body.name+' - ' + req.body.subject,
+                    text: req.body.message + ' ' + req.body.sender ,
+                    html: req.body.message + ' ' + req.body.sender,
                 });
             }
 
