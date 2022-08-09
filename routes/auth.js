@@ -5,11 +5,6 @@ const CryptoJS = require("crypto-js");
 
 
 const jwt  = require('jsonwebtoken');
-
-
-
-
-
 //register
 router.post('/signup',async (req,res)=>{
     try {
