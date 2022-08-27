@@ -1,17 +1,15 @@
 const express = require("express");
-
 const app = express()
+const server = require('http').createServer(app)
+const io = require('socket.io')(server,{cors:{origin:'*'}});
 app.use(express.json());
 require("dotenv").config();
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URL).then(() => console.log('connected to mongodb'))
 const port = process.env.PORT || 3000;
 
-const server = require('http').createServer(app)
-const socketIo = require('socket.io')
-const Server = socketIo.Server
 
-const io = new Server(server, { cors:{origin:"*"}});
+
 
 
 app.use(express.static('uploads'));
@@ -44,9 +42,9 @@ const postRoute = require('./routes/post');
 const nodemailer = require("nodemailer");
 const path = require("path");
 
-/*app.get('/', (req, res) => {
+app.get('/', (req, res) => {
     res.send('Hello World!')
-})*/
+})
 
 const threexgame = io.of('/api/v1/games/3x')
 threexgame.on('connection', function(client) {
@@ -110,4 +108,4 @@ app.post('/api/mail', (req, res) => {
 
 
 
-app.listen(port, () => console.log(`Server is running at http://localhost:${port}`));
+server.listen(port, () => console.log(`Server is running at http://localhost:${port}`));
