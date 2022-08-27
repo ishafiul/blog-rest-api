@@ -8,8 +8,12 @@ mongoose.connect(process.env.MONGO_URL).then(() => console.log('connected to mon
 const port = process.env.PORT || 3000;
 
 const server = require('http').createServer(app)
-const WebSocket = require('ws');
-const ws = new WebSocket.Server({server: server, path: "api/ws/game1"})
+const socketIo = require('socket.io')
+const Server = socketIo.Server
+
+const io = new Server(server, { cors:{origin:"*"},path: '/api/v1/ws/game1'});
+
+
 app.use(express.static('uploads'));
 
 const cors = require("cors");
@@ -43,6 +47,13 @@ const path = require("path");
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
+
+io.on("connection", (socket) => {
+    socket.on('message', (data) =>{
+
+    })
+});
+
 
 
 app.use("/api/auth", authRoute);

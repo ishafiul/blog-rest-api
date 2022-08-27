@@ -1,4 +1,6 @@
 {
+  "name": "ishaf",
+  "main": "server.js",
   "dependencies": {
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",
@@ -11,7 +13,8 @@
     "nodemailer": "^6.7.7",
     "nodemon": "^2.0.15",
     "websocket": "^1.0.34",
-    "ws": "^8.7.0"
+    "socket.io": "^4.5.1",
+    "ws": "^7.3.0"
   },
   "scripts": {
     "start": "nodemon server.js"
