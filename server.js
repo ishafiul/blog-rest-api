@@ -48,11 +48,15 @@ const path = require("path");
     res.send('Hello World!')
 })*/
 
-io.on("connection", (socket) => {
-    socket.on('message', (data) =>{
-        socket.broadcast.emit('message',data)
+const threexgame = io.of('/api/v1/games/3x')
+threexgame.on('connection', function(client) {
+    //when the server receives clicked message, do this
+    //socket.broadcast.emit('message','hello')
+    client.on('message', (data) =>{
+        client.broadcast.emit('message',data)
     })
 });
+
 
 
 
