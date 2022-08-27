@@ -11,7 +11,7 @@ const server = require('http').createServer(app)
 const socketIo = require('socket.io')
 const Server = socketIo.Server
 
-const io = new Server(server, { cors:{origin:"*"},path: '/api/v1/ws/game1'});
+const io = new Server(server, { cors:{origin:"*"}});
 
 
 app.use(express.static('uploads'));
@@ -44,9 +44,9 @@ const postRoute = require('./routes/post');
 const nodemailer = require("nodemailer");
 const path = require("path");
 
-app.get('/', (req, res) => {
+/*app.get('/', (req, res) => {
     res.send('Hello World!')
-})
+})*/
 
 io.on("connection", (socket) => {
     socket.on('message', (data) =>{
