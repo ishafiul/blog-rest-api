@@ -41,22 +41,104 @@ const authRoute = require('./routes/auth');
 const postRoute = require('./routes/post');
 const nodemailer = require("nodemailer");
 const path = require("path");
+const {removeUser, addUser, getUsers, getUser} = require("./localdb/socket_user");
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
 
+///game
+const gameList = []
 const threexgame = io.of('/api/v1/games/3x')
 threexgame.on('connection', function(client) {
-    //when the server receives clicked message, do this
-    //socket.broadcast.emit('message','hello')
+    const clientId = client.id
+
+    client.on('disconnect', (client) => {
+        removeUser(client.id);
+    })
+
     client.on('message', (data) =>{
         client.broadcast.emit('message',data)
+    })
+
+    client.on('join', ({name}) => {
+        const { error, user } = addUser({ id: client.id, name });
+        if (error) {
+            client.emit('error', {message: error})
+        }
+        else {
+            client.emit('userInfo', user);
+        }
+
+    })
+
+    client.on('create' ,()=>{
+        const userInfo = getUser(clientId);
+        if (userInfo){
+            const mainNumbers = [4, 9, 2, 3, 5, 7, 8, 1, 6]
+            const mainResult = 15;
+
+            const random = randomNumber()
+            const newNumbers = []
+            const newResult = Math.pow(random, mainResult);
+            for (let number of mainNumbers) {
+                const ne = Math.pow(random, number)
+                newNumbers.push(ne)
+
+            }
+
+            const newGameData = {
+                id: Math.floor(1000 + Math.random() * 9000),
+                players: [
+                    {
+                        id: client.id,
+                        userName: userInfo.name,
+                        isTurn: true,
+                        picketNumbers: []
+                    }
+                ],
+                numbers: newNumbers,
+                result: newResult,
+                status: 'active',
+                createdAt: new Date()
+            }
+            gameList.push(newGameData)
+            sendAvailableGameToAll()
+        }
+
     })
 });
 
 
+function randomNumber() {
+    let range = {min: 2, max: 9}
+    let delta = range.max - range.min
 
+    return Math.round(range.min + Math.random() * delta)
+}
+async function sendAvailableGameToAll() {
+    let availGames = []
+    let playinRightNow = []
+    for (let game of gameList) {
+        if (game.status === 'active') {
+            if (game.players.length === 1) {
+            }
+            availGames.push(game)
+        }
+        if (game.status === 'running') {
+            for (let player of game.players) {
+                playinRightNow.push(player.id)
+            }
+        }
+
+    }
+    threexgame.emit('gamesAvailResponse',availGames)
+}
+
+
+
+
+//////////////////////////////////////////////////////
 
 app.use("/api/auth", authRoute);
 app.use("/api/post", postRoute);
