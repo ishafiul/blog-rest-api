@@ -228,4 +228,4 @@ app.post('/api/mail', (req, res) => {
 })
 
 
-server.listen(port,'192.168.0.104',() => console.log(`Server is running at http://localhost:${port}`));
+server.listen(port,() => console.log(`Server is running at http://localhost:${port}`));
