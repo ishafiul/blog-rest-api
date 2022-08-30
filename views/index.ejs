@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: retro;
+        }
+
+        body {
+            background: #222;
+            box-sizing: border-box;
+            color: #eee;
+        }
+
+        header {
+            position: relative;
+        }
+
+        .btn {
+            border: none;
+            background-color: #eee;
+            transition: 0.5s;
+            color: #222;
+            font-size: 2rem;
+            border-radius: 5px;
+            padding: 2rem 3rem;
+            cursor: pointer;
+        }
+
+        .btn:disabled {
+            background-color: #9d9d9d;
+            color: #696969;
+            cursor: auto;
+        }
+
+        .btn:hover {
+            background-color: #d9d9d9;
+        }
+
+        button {
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        span.ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 600ms linear;
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /*game2*/
+        .game2-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .game2 {
+            font-size: 2rem;
+            padding: 28px;
+        }
+
+        .game-container {
+            margin-top: 12px;
+            display: flex;
+            gap: 50px;
+        }
+
+        #gameList {
+            padding: 6px;
+            width: 250px;
+            border: 1px solid gray;
+            border-radius: 6px;
+        }
+
+        .game-list {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid gray;
+            padding-top: 3px;
+            padding-bottom: 3px;
+        }
+
+        .join-button {
+            padding: 3px;
+            font-size: 1rem;
+        }
+
+        .game-board {
+            border: 1px solid gray;
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            width: 100%;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 6px;
+        }
+
+        .hidden {
+            visibility: hidden;
+        }
+
+        .game-board * {
+            padding: 12px;
+        }
+
+        .game-card-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-left: 1px solid gray;
+            border-right: 1px solid gray;
+        }
+
+        .card-row {
+            display: flex;
+            flex-wrap: wrap;
+            width: 500px;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            height: 150px;
+            width: 120px;
+            background-color: cadetblue;
+            border-radius: 6px;
+            font-size: 26px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            word-break: break-word;
+        }
+
+        .chat-box {
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-input {
+            position: absolute;
+            border-top: 1px solid gray;
+            padding-top: 3px;
+            padding-bottom: 3px;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .send {
+            font-size: 1.5rem;
+            padding: 6px;
+        }
+
+        #in-game-chat,
+        #global-chat {
+            position: relative;
+            border: 1px solid gray;
+            border-radius: 6px;
+            height: 300px;
+            overflow: auto;
+        }
+
+        #result {
+            font-size: 3rem;
+            color: green;
+        }
+
+        .player {
+            width: 250px;
+        }
+
+        .input-text {
+            padding: 2rem 3rem;
+            background: none;
+            border: 2px solid #eee;
+            color: #eee;
+            border-radius: 6px;
+            font-size: 2rem;
+            max-width: 28rem;
+            text-align: center;
+            transition: all 500ms linear;
+        }
+    </style>
+</head>
+<body>
+<div class="game2">
+    <div class="game2-header">
+        <div class="" id="connect-box">
+            <form id="userform" onsubmit="return false">
+                <input id="username" name="username" type="text" class="input-text" required/>
+                <button type="submit" name="submit" class="btn" id="connect">connect</button>
+            </form>
+        </div>
+        <div id="userInfo"></div>
+        <button class="btn" id="create" onclick="createNewGame()">Create Game</button>
+    </div>
+
+    <div class="game-container">
+        <div>
+            <div>Available Games</div>
+            <div id="gameList"></div>
+        </div>
+        <div class="" style="width: 100%;" id="gameBoard">
+            <div id="result"></div>
+            <div class="game-board">
+                <div class="player">
+                    player1
+                    <div id="player1">
+                        dfs
+                    </div>
+                </div>
+                <div class="game-card-container">
+                    <div>
+                        <div class=" card-row" id="cards">
+                        </div>
+                    </div>
+                </div>
+                <div class="player">
+                    player2
+                    <div id="player2">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="chat-box">
+            <h2>Chat Box</h2>
+            <br>
+            <div id="global-chat">
+                <h4>Global</h4>
+                <div class="message-input">
+                    <textarea rows="5"> </textarea>
+                    <button class="send"> Send</button>
+                </div>
+            </div>
+            <div id="in-game-chat">
+                <h4>In Game</h4>
+                <div class="message-input">
+                    <textarea rows="5"> </textarea>
+                    <button class="send"> Send</button>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+    <script>
+        document.getElementById('gameBoard').classList.add('hidden')
+        document.getElementById('in-game-chat').classList.add('hidden')
+        let userInfo
+        const socket = io("https://eblogex.herokuapp.com/api/v1/games/3x")
+        document.getElementById('userform').addEventListener('submit', onConnect)
+        socket.on('connection', () => {
+        });
+
+        function onConnect(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const formProps = Object.fromEntries(formData);
+            console.log(formProps)
+            socket.emit('join', {name: formProps.username})
+        }
+
+        socket.on('error', (error) => {
+            alert(error.message);
+        })
+
+        socket.on('userInfo', (user) => {
+            userInfo = user
+            document.getElementById("userform").classList.add('hidden')
+            document.getElementById("userInfo").innerHTML = `
+                <div>
+                    <span> ${userInfo.name}</span>
+                </div>
+                `;
+        })
+
+
+        socket.on('gamesAvailable', (gameList) => {
+            console.log(gameList)
+            let gameHTML = ''
+            gameList.forEach((game) => {
+                if (game.players[0].id !== userInfo.id) {
+                    gameHTML = gameHTML + `
+                            <div class="game-list">
+                                <span>${game.id}</span>
+                                <button id="${game.id}" onclick="joinGame(this)" class="join-button">Join Now!</button>
+                            </div>
+                            `;
+
+                }
+            })
+            document.getElementById("gameList").innerHTML = gameHTML;
+        })
+
+        socket.on('playingRightNowMe', (playingRightNowMe) => {
+            document.getElementById('gameBoard').classList.remove('hidden')
+            document.getElementById('gameList').classList.add('hidden')
+            document.getElementById('create').classList.add('hidden')
+
+            let runningGameid
+            let winnerName
+            let isSend = false
+            let cards = ''
+            for (let number of playingRightNowMe.numbers) {
+                for (let player of playingRightNowMe.players) {
+                    if (player.id === userInfo.id) {
+                        if (playingRightNowMe.players.length < 2) {
+                            cards = cards + `
+                            <div style="cursor: not-allowed" class="card">${number}</div>
+                            `
+                        } else {
+                            if (player.isTurn && number !== 0) {
+                                cards = cards + `
+                            <div id="${number}" class="card" style="cursor: pointer" onclick="pickCard(this)">${number}</div>
+                            `
+                            } else if (number === 0) {
+                                cards = cards + `
+                            <div style="cursor: not-allowed" class="card"></div>
+                            `
+                            } else {
+                                cards = cards + `
+                            <div style="cursor: not-allowed" class="card">${number}</div>
+                            `
+                            }
+                        }
+                    }
+
+                }
+
+                document.getElementById('result').innerHTML = `
+                                        You are Playing For total <span style="color:red">${playingRightNowMe.result}</span> Points
+                                        <p style="color: white;font-size: 21px">Pick one card for each turn carefuly. Multiply them and you will get the result</p>
+                                        `
+                document.getElementById('cards').innerHTML = cards
+                document.getElementById('in-game-chat').classList.remove('hidden')
+
+
+                if (playingRightNowMe.players[0].id === userInfo.id) {
+
+                    document.getElementById('player1').innerHTML = `${playingRightNowMe.players[0].userName} numbers: ${playingRightNowMe.players[0].picketNumbers}`
+                    if (playingRightNowMe.players[1]) {
+                        document.getElementById('player2').innerHTML = `${playingRightNowMe.players[1].userName} numbers: ${playingRightNowMe.players[1].picketNumbers}`
+                    }
+                } else if (playingRightNowMe.players[1].id === userInfo.id) {
+
+                    document.getElementById('player2').innerHTML = `${playingRightNowMe.players[1].userName} numbers: ${playingRightNowMe.players[1].picketNumbers}`
+                    document.getElementById('player1').innerHTML = `${playingRightNowMe.players[0].userName} numbers: ${playingRightNowMe.players[0].picketNumbers}`
+                }
+                if (playingRightNowMe && playingRightNowMe.players[0].picketNumbers.length >= 3 && findResult(playingRightNowMe.players[0].picketNumbers, playingRightNowMe.result)) {
+                   // alert('player1 win the game')
+                    runningGameid = playingRightNowMe.id
+                    winnerName = playingRightNowMe.players[0].userName
+                } else if (playingRightNowMe && playingRightNowMe.players[1] && playingRightNowMe.players[1].picketNumbers.length >= 3 && findResult(playingRightNowMe.players[1].picketNumbers, playingRightNowMe.result)) {
+                   // alert('player2 win the game')
+                    runningGameid = playingRightNowMe.id
+                    winnerName = playingRightNowMe.players[1].userName
+                } else if (playingRightNowMe && playingRightNowMe.numbers.every(zeroTest)) {
+                    //alert('draw')
+                    runningGameid = playingRightNowMe.id
+                    winnerName = 'Draw!'
+                }
+
+            }
+            if (runningGameid && winnerName){
+                finishGame(runningGameid,winnerName)
+            }
+
+
+        })
+
+        socket.on('gamesFinish',(winState)=>{
+            setTimeout(()=>{
+                alert(winState.winState)
+            },300)
+            document.getElementById('gameBoard').classList.add('hidden')
+            document.getElementById('gameList').classList.remove('hidden')
+            document.getElementById('create').classList.remove('hidden')
+        })
+
+        function createNewGame() {
+            socket.emit('create');
+        }
+
+        function joinGame(event) {
+            const gameId = event.id
+            socket.emit('joinGame', {gameId})
+        }
+
+
+        function zeroTest(element) {
+            return element === 0;
+        }
+
+        function findResult(arr, sum) {
+            const map = new Map();
+            for (let i = 0; i < arr.length; i++) {
+                map.set(parseInt(arr[i]), parseInt(i));
+            }
+            for (let i = 0; i < arr.length - 1; i++) {
+
+                for (let j = i + 1; j < arr.length; j++) {
+                    let val = sum / (arr[i] * arr[j]);
+                    if (map.has(val)) {
+                        if (map.get(val) !== i && map.get(val) !== j) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function pickCard(that) {
+            socket.emit('picked',{pickedNumber: that.id})
+        }
+
+        function finishGame(id,name) {
+            socket.emit('gameFinished',{gameId: id, name})
+        }
+    </script>
+</div>
+</body>
+</html>

@@ -3,11 +3,15 @@ const app = express()
 const server = require('http').createServer(app)
 const io = require('socket.io')(server, {
     cors: {
-        origin: "https://shafi-org.github.io",
+        origin: "*",
         methods: ["GET", "POST"],
     },
 });
 app.use(express.json());
+
+app.set('view engine', 'ejs');
+
+
 require("dotenv").config();
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URL).then(() => console.log('connected to mongodb'))
@@ -52,6 +56,9 @@ app.get('/', (req, res) => {
 
 ///game
 const threexgame = io.of('/api/v1/games/3x')
+app.get('/games/3x',(req,res)=>{
+    res.render('index')
+})
 threexgame.on('connection', function (client) {
     client.on('disconnect', (client) => {
         setTimeout(() => {
@@ -130,20 +137,22 @@ threexgame.on('connection', function (client) {
         sendPlayingRightNowGame({clientId: client.id})
     })
 
-    client.on('gameFinished', ({gameId, name}) => {
+    client.on('gameFinished', ({gameId,name}) => {
         changeGameStatus({gameId: gameId, gameStatus: "finished"})
         const players = getPlayersIdFromGame(gameId)
         let winState
-        if (name === 'Draw!') {
+        if (name === 'Draw!'){
             winState = "Draw"
-        } else {
+        }
+        else {
             winState = `${name} Win The Game`
         }
-        if (players[0] !== client.id) {
-            threexgame.to(players[0]).emit('gamesFinish', {winState})
+        if (players[0] !== client.id){
+            threexgame.to(players[0]).emit('gamesFinish',{winState})
             sendAvailableGamesToAll()
-        } else {
-            threexgame.to(players[1]).emit('gamesFinish', {winState})
+        }
+        else {
+            threexgame.to(players[1]).emit('gamesFinish',{winState})
             sendAvailableGamesToAll()
         }
 
@@ -161,12 +170,13 @@ function sendAvailableGamesToClient(id) {
 
 function sendPlayingRightNowGame({clientId}) {
     const game = findGameByPlayerId(clientId)
-    if (game) {
-        if (game.players.length > 1) {
+    if  (game) {
+        if (game.players.length >1){
             game.players.forEach((player) => {
                 threexgame.to(player.id).emit('playingRightNowMe', game)
             })
-        } else {
+        }
+        else {
             threexgame.to(clientId).emit('playingRightNowMe', game)
         }
     }
@@ -218,4 +228,4 @@ app.post('/api/mail', (req, res) => {
 })
 
 
-server.listen(port, '192.168.0.104', () => console.log(`Server is running at http://localhost:${port}`));
+server.listen(port,'192.168.0.104',() => console.log(`Server is running at http://localhost:${port}`));
