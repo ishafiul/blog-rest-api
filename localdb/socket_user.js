@@ -18,9 +18,12 @@ const addUser = ({id, name}) => {
 
 const removeUser = (id) => {
     const index = users.findIndex((user) => {
-        return user.id === id
+        if (user.id === id){
+            return user
+        }
+
     });
-    if(index) {
+    if(index !== -1) {
         return users.splice(index,1)[0];
     }
 }
@@ -30,11 +33,13 @@ const getUsers = ()=>{
 }
 
 const getUser = (id) => {
-    const isFound = users.find((user) => {
-        return user.id === id
+    const isFound = users.findIndex((user) => {
+        if (user.id === id){
+            return user
+        }
     });
-    if(isFound){
-        return isFound;
+    if(isFound !== -1){
+        return users[isFound];
     }
 }
 
