@@ -270,7 +270,7 @@
         document.getElementById('gameBoard').classList.add('hidden')
         document.getElementById('in-game-chat').classList.add('hidden')
         let userInfo
-        const socket = io("https://eblogex.herokuapp.com/api/v1/games/3x")
+        const socket = io("https://web-production-5580.up.railway.app/api/v1/games/3x")
         document.getElementById('userform').addEventListener('submit', onConnect)
         socket.on('connection', () => {
         });
