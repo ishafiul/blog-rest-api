@@ -69,7 +69,7 @@ app.get('/meetmedisable', (req, res) => {
                     });
                 }
                 else{
-                    if(macIds.length <= 2){
+                    if(macIds.length <= 32){
                         macIds.push(mac.toString())
                         res.status(200).json({
                             "status": true,
