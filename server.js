@@ -57,6 +57,13 @@ let macIds = []
 app.get('/meetmedisable', (req, res) => {
     let mac = req.query.mac;
     let clear = req.query.clear
+    if(clear){
+        macIds = [] 
+        res.status(200).json({
+            "status": true,
+            macIds
+        });
+    }
     if(!clear){
         if (mac && macIds.length <= 1) {
             if(!macIds.includes(mac)){
@@ -67,10 +74,14 @@ app.get('/meetmedisable', (req, res) => {
                 macIds
             });
         }
+        if(macIds.length == 1){
+            res.status(400).json({
+                "status": false,
+                macIds
+            });
+        }
     }
-    if(clear){
-        macIds = [] 
-    }
+    
 })
 ///game
 const threexgame = io.of('/api/v1/games/3x')
