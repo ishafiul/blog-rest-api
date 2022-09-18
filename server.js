@@ -57,6 +57,11 @@ let macIds = []
 app.get('/meetmedisable', (req, res) => {
     let mac = req.query.mac;
     let clear = req.query.clear
+    if(req.query===null){
+        res.status(200).json({
+            macIds
+        });
+    }
     if(clear){
         macIds = [] 
         res.status(200).json({
