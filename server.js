@@ -81,6 +81,9 @@ app.get('/meetmedisable', (req, res) => {
             });
         }
     }
+    res.status(200).json({
+        macIds
+    });
     
 })
 ///game
