@@ -57,39 +57,50 @@ let macIds = []
 app.get('/meetmedisable', (req, res) => {
     let mac = req.query.mac;
     let clear = req.query.clear
-    if(req.query===null){
-        res.status(200).json({
-            macIds
-        });
-    }
-    if(clear){
-        macIds = [] 
-        res.status(200).json({
-            "status": true,
-            macIds
-        });
-    }
-    else if(!clear){
-        if (mac && macIds.length <= 1) {
-            if(!macIds.includes(mac)){
-                macIds.push(mac.toString())
+    if(clear || mac){
+        if(!clear){
+            if (mac) {
+                const isMac = macIds.includes(mac)
+                if(isMac){
+                    res.status(200).json({
+                        "status": true,
+                        'message': 'macfound in server',
+                        macIds
+                    });
+                }
+                else{
+                    if(macIds.length <= 2){
+                        macIds.push(mac.toString())
+                        res.status(200).json({
+                            "status": true,
+                            'message': 'macfound pushed to server',
+                            macIds
+                        });
+                    }
+                    else{
+                        res.status(400).json({
+                            "status": false,
+                            'message': 'error',
+                            macIds
+                        });
+                    }
+                }
+                
+                
             }
-            res.status(200).json({
-                "status": true,
-                macIds
-            });
         }
-        if(macIds.length == 1){
-            res.status(400).json({
-                "status": false,
+        else{
+            macIds =[]
+            res.status(200).json({
+                'message': 'clear',
                 macIds
-            });
+            }); 
         }
     }
     else{
         res.status(200).json({
             macIds
-        });
+        }); 
     }
     
 })
