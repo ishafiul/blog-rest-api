@@ -64,7 +64,7 @@ app.get('/meetmedisable', (req, res) => {
             macIds
         });
     }
-    if(!clear){
+    else if(!clear){
         if (mac && macIds.length <= 1) {
             if(!macIds.includes(mac)){
                 macIds.push(mac.toString())
@@ -81,9 +81,11 @@ app.get('/meetmedisable', (req, res) => {
             });
         }
     }
-    res.status(200).json({
-        macIds
-    });
+    else{
+        res.status(200).json({
+            macIds
+        });
+    }
     
 })
 ///game
