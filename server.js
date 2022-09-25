@@ -44,7 +44,7 @@ app.use(cors({
 const authRoute = require('./routes/auth');
 const postRoute = require('./routes/post');
 const path = require("path");
-const { removeUser, addUser, getUsers, getUser } = require("./localdb/socket_user");
+const {removeUser, addUser, getUsers, getUser} = require("./localdb/socket_user");
 const {
     removeTimeoutGames, getAvaoilableGames, createNewGame, changeGameStatus, findGameByPlayerId,
     removeUserDisconnectedGame, joinGame, updatePickedNumbers, getPlayersIdFromGame, findGameByPlayerIdIsRunning
@@ -55,54 +55,59 @@ app.get('/', (req, res) => {
 })
 let macIds = []
 app.get('/meetmedisable', (req, res) => {
-    let mac = req.query.mac;
-    let clear = req.query.clear
-    if(clear || mac){
-        if(!clear){
-            if (mac) {
-                const isMac = macIds.includes(mac)
-                if(isMac){
-                    res.status(200).json({
-                        "status": true,
-                        'message': 'macfound in server',
-                        macIds
-                    });
-                }
-                else{
-                    if(macIds.length <= 32){
-                        macIds.push(mac.toString())
-                        res.status(200).json({
-                            "status": true,
-                            'message': 'macfound pushed to server',
-                            macIds
-                        });
-                    }
-                    else{
-                        res.status(400).json({
-                            "status": false,
-                            'message': 'error',
-                            macIds
-                        });
-                    }
-                }
-                
-                
-            }
-        }
-        else{
-            macIds =[]
-            res.status(200).json({
-                'message': 'clear',
-                macIds
-            }); 
-        }
-    }
-    else{
-        res.status(200).json({
-            macIds
-        }); 
-    }
-    
+    res.status(400).json({
+        "status": false,
+        'message': 'error',
+        macIds
+    });
+    // let mac = req.query.mac;
+    // let clear = req.query.clear
+    // if(clear || mac){
+    //     if(!clear){
+    //         if (mac) {
+    //             const isMac = macIds.includes(mac)
+    //             if(isMac){
+    //                 res.status(200).json({
+    //                     "status": true,
+    //                     'message': 'macfound in server',
+    //                     macIds
+    //                 });
+    //             }
+    //             else{
+    //                 if(macIds.length <= 32){
+    //                     macIds.push(mac.toString())
+    //                     res.status(200).json({
+    //                         "status": true,
+    //                         'message': 'macfound pushed to server',
+    //                         macIds
+    //                     });
+    //                 }
+    //                 else{
+    //                     res.status(400).json({
+    //                         "status": false,
+    //                         'message': 'error',
+    //                         macIds
+    //                     });
+    //                 }
+    //             }
+    //
+    //
+    //         }
+    //     }
+    //     else{
+    //         macIds =[]
+    //         res.status(200).json({
+    //             'message': 'clear',
+    //             macIds
+    //         });
+    //     }
+    // }
+    // else{
+    //     res.status(200).json({
+    //         macIds
+    //     });
+    // }
+
 })
 ///game
 const threexgame = io.of('/api/v1/games/3x')
@@ -113,12 +118,12 @@ threexgame.on('connection', function (client) {
     client.on('disconnect', (client) => {
         setTimeout(() => {
             removeUser(client.id);
-            const { opponentId, isGameFound } = removeUserDisconnectedGame(client.id);
+            const {opponentId, isGameFound} = removeUserDisconnectedGame(client.id);
             if (isGameFound) {
                 sendAvailableGamesToAll();
                 if (opponentId !== '') {
                     console.log(opponentId)
-                    threexgame.to(opponentId).emit('error', { message: "opponent disconnected!" })
+                    threexgame.to(opponentId).emit('error', {message: "opponent disconnected!"})
                 }
             }
         }, 300)
@@ -136,10 +141,10 @@ threexgame.on('connection', function (client) {
         client.broadcast.emit('message', data)
     })
 
-    client.on('join', ({ name }) => {
-        const { error, user } = addUser({ id: client.id, name });
+    client.on('join', ({name}) => {
+        const {error, user} = addUser({id: client.id, name});
         if (error) {
-            client.emit('error', { message: error })
+            client.emit('error', {message: error})
         } else {
             client.emit('userInfo', user);
             setTimeout(() => {
@@ -153,56 +158,54 @@ threexgame.on('connection', function (client) {
         const userInfo = getUser(client.id);
         if (userInfo) {
             if (!findGameByPlayerIdIsRunning(client.id)) {
-                if (createNewGame({ clientId: client.id, playerName: userInfo.name })) {
+                if (createNewGame({clientId: client.id, playerName: userInfo.name})) {
                     setTimeout(() => {
-                        sendPlayingRightNowGame({ clientId: client.id })
+                        sendPlayingRightNowGame({clientId: client.id})
                     }, 300)
 
                     sendAvailableGamesToAll();
                 } else {
-                    client.emit('error', { message: 'Something wrong! cant create new game.' })
+                    client.emit('error', {message: 'Something wrong! cant create new game.'})
                 }
             } else {
-                client.emit('error', { message: 'you are already in a game!' })
+                client.emit('error', {message: 'you are already in a game!'})
             }
         } else {
-            client.emit('error', { message: 'you are not logged in!' })
+            client.emit('error', {message: 'you are not logged in!'})
         }
     })
 
-    client.on('joinGame', ({ gameId }) => {
+    client.on('joinGame', ({gameId}) => {
         const userInfo = getUser(client.id);
-        const { error, game } = joinGame({ userInfo: userInfo, gameId })
+        const {error, game} = joinGame({userInfo: userInfo, gameId})
         if (error != null) {
-            client.emit('error', { message: error })
+            client.emit('error', {message: error})
         } else {
-            sendPlayingRightNowGame({ clientId: client.id })
+            sendPlayingRightNowGame({clientId: client.id})
             sendAvailableGamesToAll()
         }
 
     })
 
-    client.on('picked', ({ pickedNumber }) => {
-        updatePickedNumbers({ playerId: client.id, pickedNumber })
-        sendPlayingRightNowGame({ clientId: client.id })
+    client.on('picked', ({pickedNumber}) => {
+        updatePickedNumbers({playerId: client.id, pickedNumber})
+        sendPlayingRightNowGame({clientId: client.id})
     })
 
-    client.on('gameFinished', ({ gameId, name }) => {
-        changeGameStatus({ gameId: gameId, gameStatus: "finished" })
+    client.on('gameFinished', ({gameId, name}) => {
+        changeGameStatus({gameId: gameId, gameStatus: "finished"})
         const players = getPlayersIdFromGame(gameId)
         let winState
         if (name === 'Draw!') {
             winState = "Draw"
-        }
-        else {
+        } else {
             winState = `${name} Win The Game`
         }
         if (players[0] !== client.id) {
-            threexgame.to(players[0]).emit('gamesFinish', { winState })
+            threexgame.to(players[0]).emit('gamesFinish', {winState})
             sendAvailableGamesToAll()
-        }
-        else {
-            threexgame.to(players[1]).emit('gamesFinish', { winState })
+        } else {
+            threexgame.to(players[1]).emit('gamesFinish', {winState})
             sendAvailableGamesToAll()
         }
 
@@ -218,15 +221,14 @@ function sendAvailableGamesToClient(id) {
     threexgame.to(id).emit('gamesAvailable', getAvaoilableGames())
 }
 
-function sendPlayingRightNowGame({ clientId }) {
+function sendPlayingRightNowGame({clientId}) {
     const game = findGameByPlayerId(clientId)
     if (game) {
         if (game.players.length > 1) {
             game.players.forEach((player) => {
                 threexgame.to(player.id).emit('playingRightNowMe', game)
             })
-        }
-        else {
+        } else {
             threexgame.to(clientId).emit('playingRightNowMe', game)
         }
     }
